@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db1-init-sql
+data:
+  init.sql: |
+    CREATE SCHEMA IF NOT EXISTS tenant_schema;
+
+    CREATE TABLE IF NOT EXISTS tenant_schema.users (
+                                                       id SERIAL PRIMARY KEY,
+                                                       username VARCHAR(100) UNIQUE NOT NULL,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        role VARCHAR(50) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+    -- Roles
+    DO $$
+    BEGIN
+        IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'tenant_reader') THEN
+    CREATE ROLE tenant_reader LOGIN PASSWORD 'reader_password';
+    END IF;
+    END$$;
+
+    GRANT CONNECT ON DATABASE tenant1db TO tenant_reader;
+    GRANT USAGE ON SCHEMA tenant_schema TO tenant_reader;
+    GRANT SELECT ON ALL TABLES IN SCHEMA tenant_schema TO tenant_reader;
+    ALTER DEFAULT PRIVILEGES IN SCHEMA tenant_schema
+        GRANT SELECT ON TABLES TO tenant_reader;
+
+    DO $$
+    BEGIN
+        IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'tenant_writer') THEN
+    CREATE ROLE tenant_writer LOGIN PASSWORD 'writer_password';
+    END IF;
+    END$$;
+
+    GRANT CONNECT ON DATABASE tenant1db TO tenant_writer;
+    GRANT USAGE ON SCHEMA tenant_schema TO tenant_writer;
+    GRANT INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA tenant_schema TO tenant_writer;
+    ALTER DEFAULT PRIVILEGES IN SCHEMA tenant_schema
+        GRANT INSERT, UPDATE, DELETE ON TABLES TO tenant_writer;
+
+    -- Default Data
+    INSERT INTO tenant_schema.users (username, email, role) VALUES
+                                                                ('alice', 'alice@tenant1.com', 'admin'),
+                                                                ('bob', 'bob@tenant1.com', 'reader'),
+                                                                ('charlie', 'charlie@tenant1.com', 'writer')
+        ON CONFLICT DO NOTHING;

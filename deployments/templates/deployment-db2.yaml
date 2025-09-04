@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db2
+  template:
+    metadata:
+      labels:
+        app: db2
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: {{ .Values.db2.user | quote }}
+            - name: POSTGRES_PASSWORD
+              value: {{ .Values.db2.password | quote }}
+            - name: POSTGRES_DB
+              value: {{ .Values.db2.database | quote }}
+          volumeMounts:
+            - name: db2-init
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: db2-init
+          configMap:
+            name: db2-init-sql

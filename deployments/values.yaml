@@ -1,0 +1,16 @@
+pgadmin:
+  email: admin@domain.com
+  password: admin
+  service:
+    type: NodePort
+    nodePort: 30080
+
+db1:
+  user: tenant1_admin
+  password: tenant1_password
+  database: tenant1db
+
+db2:
+  user: tenant2_admin
+  password: tenant2_password
+  database: tenant2db
