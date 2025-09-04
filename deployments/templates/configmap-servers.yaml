@@ -13,7 +13,7 @@ data:
           "Port": 5432,
           "MaintenanceDB": "tenant1db",
           "Username": "tenant_reader",
-          "Password": "reader_password",
+          "Password": "reader_password1",
           "SSLMode": "prefer"
         },
         "2": {
@@ -23,7 +23,7 @@ data:
           "Port": 5432,
           "MaintenanceDB": "tenant2db",
           "Username": "tenant2_reader",
-          "Password": "reader_password",
+          "Password": "reader_password2",
           "SSLMode": "prefer"
         }
       }
